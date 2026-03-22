@@ -3,6 +3,7 @@ import axe from 'axe-core';
 
 /**
  * Scan HTML content for WCAG accessibility violations using axe-core.
+ * Uses axe-core's Node.js API directly (no script injection).
  *
  * @param {string} html - The HTML string to scan
  * @param {object} options - Scan options
@@ -13,20 +14,13 @@ export async function scanHTML(html, options = {}) {
   const standard = options.standard || 'wcag2aa';
 
   const dom = new JSDOM(html, {
-    runScripts: 'dangerously',
-    resources: 'usable',
     pretendToBeVisual: true,
   });
 
   const { document } = dom.window;
 
-  // Inject axe-core into the JSDOM environment
-  const axeScript = dom.window.document.createElement('script');
-  axeScript.textContent = axe.source;
-  document.head.appendChild(axeScript);
-
-  // Run axe-core
-  const results = await dom.window.axe.run(document, {
+  // Use axe-core's Node.js API directly
+  const results = await axe.run(document.documentElement, {
     runOnly: {
       type: 'tag',
       values: getTagsForStandard(standard),
