@@ -1,0 +1,228 @@
+openapi: 3.0.3
+info:
+  title: A11y Fix Engine API
+  description: |
+    AI-powered WCAG accessibility auto-fix engine.
+    Scan HTML for WCAG 2.2 violations and get auto-fixed source code.
+
+    Unlike overlay solutions, this API generates real source-code fixes.
+
+    ## Authentication
+    - Free tier: No API key required (100 requests/hour)
+    - Pro/Agency: Pass API key via `X-API-Key` header
+  version: 0.1.0
+  contact:
+    name: A11y Fix Engine
+  license:
+    name: MIT
+
+servers:
+  - url: https://a11y-fix-engine-api.workers.dev
+    description: Production
+  - url: http://localhost:3100
+    description: Local development
+
+paths:
+  /api/v1/scan:
+    post:
+      summary: Scan HTML for accessibility violations
+      description: Analyze HTML content and return WCAG violations with severity and remediation guidance.
+      operationId: scanHTML
+      tags: [Scanning]
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanRequest'
+            example:
+              html: '<html><body><img src="photo.jpg"></body></html>'
+              standard: wcag2aa
+      responses:
+        '200':
+          description: Scan results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScanResponse'
+        '400':
+          description: Invalid request
+        '429':
+          description: Rate limit exceeded
+
+  /api/v1/fix:
+    post:
+      summary: Scan and auto-fix accessibility violations
+      description: |
+        Analyze HTML, automatically fix what can be fixed, and return the corrected HTML
+        along with a detailed report of changes made and issues requiring manual review.
+      operationId: fixHTML
+      tags: [Fixing]
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanRequest'
+      responses:
+        '200':
+          description: Fixed HTML with report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FixResponse'
+        '403':
+          description: Fix feature requires Pro or Agency plan
+
+  /api/v1/rules:
+    get:
+      summary: List supported fix rules
+      description: Get all axe-core rules mapped to WCAG criteria with auto-fix capabilities.
+      operationId: listRules
+      tags: [Info]
+      responses:
+        '200':
+          description: Rule list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RulesResponse'
+
+  /api/v1/health:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      tags: [Info]
+      responses:
+        '200':
+          description: Service status
+
+  /api/v1/pricing:
+    get:
+      summary: Get pricing plans
+      operationId: getPricing
+      tags: [Info]
+      responses:
+        '200':
+          description: Available plans
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for Pro/Agency plans. Omit for free tier.
+
+  schemas:
+    ScanRequest:
+      type: object
+      required: [html]
+      properties:
+        html:
+          type: string
+          description: HTML content to scan
+        standard:
+          type: string
+          enum: [wcag2a, wcag2aa, wcag2aaa]
+          default: wcag2aa
+          description: WCAG conformance level
+
+    ScanResponse:
+      type: object
+      properties:
+        scan:
+          $ref: '#/components/schemas/ScanSummary'
+        violations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Violation'
+        report:
+          type: string
+          description: Markdown report
+
+    FixResponse:
+      type: object
+      properties:
+        fixedHTML:
+          type: string
+          description: HTML with auto-fixes applied
+        scan:
+          $ref: '#/components/schemas/ScanSummary'
+        fixes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Fix'
+        unfixable:
+          type: array
+          items:
+            $ref: '#/components/schemas/Violation'
+        report:
+          type: string
+
+    ScanSummary:
+      type: object
+      properties:
+        totalViolations:
+          type: integer
+        totalIssues:
+          type: integer
+        critical:
+          type: integer
+        serious:
+          type: integer
+        moderate:
+          type: integer
+        minor:
+          type: integer
+
+    Violation:
+      type: object
+      properties:
+        ruleId:
+          type: string
+        wcag:
+          type: string
+        description:
+          type: string
+        impact:
+          type: string
+          enum: [critical, serious, moderate, minor]
+        nodes:
+          type: integer
+        helpUrl:
+          type: string
+
+    Fix:
+      type: object
+      properties:
+        fixType:
+          type: string
+        ruleId:
+          type: string
+        wcag:
+          type: string
+        impact:
+          type: string
+        description:
+          type: string
+        before:
+          type: string
+        after:
+          type: string
+        note:
+          type: string
+
+    RulesResponse:
+      type: object
+      properties:
+        totalRules:
+          type: integer
+        autoFixable:
+          type: integer
+        rules:
+          type: object
