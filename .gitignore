@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+.env.local
+.wrangler/
+*.log
+.DS_Store
+a11y-fix-report.md

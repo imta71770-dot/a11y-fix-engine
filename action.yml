@@ -1,0 +1,43 @@
+name: 'A11y Fix Engine'
+author: 'a11y-fix-engine'
+description: 'Scan HTML files for WCAG accessibility violations and auto-fix them. Get fix suggestions as PR annotations.'
+
+inputs:
+  path:
+    description: 'Path to scan (glob pattern). Default: all HTML files'
+    required: false
+    default: '**/*.html'
+  standard:
+    description: 'WCAG standard level: wcag2a, wcag2aa, wcag2aaa'
+    required: false
+    default: 'wcag2aa'
+  fix:
+    description: 'Auto-fix mode: "report" (annotations only), "commit" (commit fixes), "pr" (create fix PR)'
+    required: false
+    default: 'report'
+  fail_on:
+    description: 'Fail the check on: "critical", "serious", "moderate", "minor", "none"'
+    required: false
+    default: 'serious'
+  api_key:
+    description: 'API key for premium features (AI-powered alt text, advanced fixes). Optional.'
+    required: false
+    default: ''
+
+outputs:
+  total_violations:
+    description: 'Total number of violations found'
+  total_fixed:
+    description: 'Total number of issues auto-fixed'
+  total_manual:
+    description: 'Total number of issues requiring manual review'
+  report:
+    description: 'Path to the generated Markdown report'
+
+runs:
+  using: 'node20'
+  main: 'src/action/index.js'
+
+branding:
+  icon: 'check-circle'
+  color: 'green'
