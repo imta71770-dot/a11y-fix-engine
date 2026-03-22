@@ -1,0 +1,20 @@
+name = "a11y-fix-engine-api"
+main = "src/api/worker.js"
+compatibility_date = "2024-12-01"
+
+[vars]
+ENVIRONMENT = "production"
+
+# Uncomment and set after creating KV namespace:
+# [[kv_namespaces]]
+# binding = "API_KEYS"
+# id = ""
+
+# Uncomment and set after Stripe setup:
+# [vars]
+# STRIPE_PRO_PRICE_ID = ""
+# STRIPE_AGENCY_PRICE_ID = ""
+
+# Secrets (set via `wrangler secret put`):
+# STRIPE_SECRET_KEY
+# STRIPE_WEBHOOK_SECRET
