@@ -1,0 +1,59 @@
+# Example: Add accessibility checking to your pull requests
+#
+# Copy this file to .github/workflows/a11y.yml in your repository
+# Every PR will be scanned for WCAG 2.2 AA violations automatically
+
+name: Accessibility Check
+
+on:
+  pull_request:
+    paths:
+      - '**/*.html'
+      - '**/*.htm'
+
+jobs:
+  accessibility:
+    name: WCAG Compliance Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run A11y Fix Engine
+        uses: imta71770-dot/a11y-fix-engine@v0.1.0
+        id: a11y
+        with:
+          path: '**/*.html'
+          standard: 'wcag2aa'
+          fix: 'commit'
+          fail_on: 'serious'
+
+      - name: Comment results on PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const violations = '${{ steps.a11y.outputs.total_violations }}';
+            const fixed = '${{ steps.a11y.outputs.total_fixed }}';
+            const manual = '${{ steps.a11y.outputs.total_manual }}';
+
+            const body = `## Accessibility Report
+
+            | Metric | Count |
+            |--------|-------|
+            | Violations found | ${violations} |
+            | Auto-fixed | ${fixed} |
+            | Needs manual review | ${manual} |
+
+            ${fixed > 0 ? '✅ Auto-fixes have been committed.' : ''}
+            ${manual > 0 ? '⚠️ Some issues require manual review. See annotations above.' : ''}
+            ${violations == 0 ? '🎉 No accessibility violations found!' : ''}
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            });
