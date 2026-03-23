@@ -177,6 +177,6 @@ MIT
 
 ## Learn More
 
-- [WCAG 2.2 Explained in Plain English](https://accessibleweb-guide.pages.dev/blog/wcag-explained-plain-english/)
-- [5-Minute Accessibility Audit](https://accessibleweb-guide.pages.dev/blog/five-minute-accessibility-audit/)
+- [WCAG 2.2 Explained in Plain English](https://blog.a11yfix.dev/blog/wcag-explained-plain-english/)
+- [5-Minute Accessibility Audit](https://blog.a11yfix.dev/blog/five-minute-accessibility-audit/)
 - [Overlay Fact Sheet](https://overlayfactsheet.com/)
