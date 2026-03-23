@@ -6,3 +6,4 @@ dist/
 *.log
 .DS_Store
 a11y-fix-report.md
+.next/
